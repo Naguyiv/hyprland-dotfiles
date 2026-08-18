@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Launchpad
+Exec=hyprctl dispatch global quickshell:Launchpad
+Terminal=false
+Type=Application
+Icon=Launchpad
+Comment=Launchpad
+Categories=Office;
