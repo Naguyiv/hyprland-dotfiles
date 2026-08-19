@@ -6,3 +6,11 @@ config/.config/Code - OSS/
 local/.local/share/pki/
 
 local/.local/share/hyprland/
+
+config/.config/chromium/
+
+config/.config/systemd/
+
+config/.config/dconf/
+
+local/.local/state/
