@@ -1,5 +1,6 @@
 import Quickshell
 import QtQuick
+import QtMultimedia
 
 PanelWindow {
     id: bg
@@ -14,7 +15,25 @@ PanelWindow {
     Image {
         id: bgimage
         anchors.fill: parent
-        source: wallpaper // Or wallpaper
+        source: wallpaper // Or wallpapes
+
+        visible: false
+    }
+
+    MediaPlayer {
+        id: bgvideo
+        source: "/home/iv/Downloads/jita.mp4"
+        videoOutput: vv
+        autoPlay: true
+        loops: MediaPlayer.Infinite
+
+        
+    }
+
+    VideoOutput {
+        id: vv
+        anchors.fill: parent
+        visible: true
     }
 
     aboveWindows: false

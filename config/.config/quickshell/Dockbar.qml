@@ -1,20 +1,20 @@
-import QtQuick
+import QtQuick 2.15
 import Quickshell
 import Quickshell.Wayland
+
 
 PanelWindow {
     id: dockBar
 
-    property int dockBarHeight: 85
+    Properties {
+        id: properties
+    }
+
+    property int dockBarHeight: properties.expandedHeight
     property bool iconHovered: false
-    property var dockApps: ["Firefox", "Code-OSS", "Launchpad", "Alacritty", "obsidian", "chromium", "org.quickshell", "gitkraken"]
-    property int dockAppsLength: dockApps.length 
-    
-    property int totalWidth: (dockApps.length  * 40) + ((dockApps.length + 1) * 10)
 
-
-    WlrLayershell.namespace: "dockBar"
-    visible: true
+    WlrLayershell.namespace: properties.namespace
+    visible: properties.dockVisible
     color: "transparent"
     implicitHeight: dockBarHeight
     aboveWindows: true
@@ -36,30 +36,30 @@ PanelWindow {
     Timer {
         id: hideTimer
 
-        interval: 500
+        interval: properties.hideInterval
         repeat: false
         onTriggered: {
-            dockBar.dockBarHeight = 10;
-            recdockBar.recdockBarColor = "transparent";
+            dockBar.dockBarHeight = properties.dockbarcollapsedHeight;
+            recdockBar.recdockBarColor = properties.barColorHidden;
         }
     }
 
     Rectangle {
         id: recdockBar
 
-        property color recdockBarColor: "white"
+        property color recdockBarColor: properties.barColorActive
 
-        width: totalWidth
-        height: 60
-        radius: 10
-        opacity: 0.4
+        width: properties.totalWidth
+        height: properties.iconHeight + 20
+        radius: properties.dockRadius
+        opacity: properties.barOpacity
         color: recdockBarColor
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
-        anchors.topMargin: 9
+        anchors.topMargin: properties.dockTopMargin
 
         Timer {
-            interval: 100
+            interval: properties.hoverCheckInterval
             running: true
             repeat: true
             onTriggered: {
@@ -76,42 +76,25 @@ PanelWindow {
             anchors.fill: parent
             hoverEnabled: true
             onEntered: {
-                dockBar.dockBarHeight = 85;
-                recdockBar.recdockBarColor = "white";
+                dockBar.dockBarHeight = properties.expandedHeight;
+                recdockBar.recdockBarColor = properties.barColorActive;
                 hideTimer.stop();
             }
             onExited: hideTimer.start()
         }
+    }
 
-    }
-    Row {
-        spacing: 10
-        
-    }
     Row {
         id: iconRow
 
-        property int iconWidth: 40
-        property int iconHeight: 40
-        property color iconColor: "transparent"
-
-        spacing: 10
+        spacing: properties.iconSpacing
         anchors.left: recdockBar.left
-        anchors.leftMargin: 10
+        anchors.leftMargin: properties.iconSpacing
         anchors.top: recdockBar.top
-        anchors.topMargin: 10
-
-        Timer {
-            id: clickEffect
-
-            interval: 300
-            repeat: false
-            onTriggered: {
-            }
-        }
+        anchors.topMargin: properties.iconSpacing
 
         Repeater {
-            model: dockBar.dockApps
+            model: properties.dockApps
 
             delegate: Rectangle {
                 id: iconRect
@@ -120,33 +103,32 @@ PanelWindow {
                 property var de: null
                 property var recentrating: 0
 
-                width: iconRow.iconWidth
-                height: iconRow.iconHeight
-                color: iconRow.iconColor
+                width: properties.iconWidth
+                height: properties.iconHeight
+                color: properties.iconColor
 
                 Rectangle {
                     id: u1
 
                     visible: false
                     anchors.centerIn: parent
-                    width: iconRow.iconWidth + 7
-                    height: iconRow.iconHeight + 7
-                    color: "white"
-                    radius: 10
-                    opacity: 0.3
+                    width: properties.iconWidth + 7
+                    height: properties.iconHeight + 7
+                    color: properties.highlightColor
+                    radius: properties.dockRadius
+                    opacity: properties.highlightOpacity
                 }
 
                 Timer {
                     id: retryTimer
 
-                    interval: 250
+                    interval: properties.retryInterval
                     running: true
                     repeat: true
                     onTriggered: {
                         iconRect.de = DesktopEntries.heuristicLookup(iconRect.desktopId);
                         if (iconRect.de)
                             stop();
-
                     }
                 }
 
@@ -158,10 +140,17 @@ PanelWindow {
                     source: iconRect.de ? Quickshell.iconPath(iconRect.de.icon) : ""
                 }
 
+                Text {
+                    anchors.top: parent.bottom
+                    text: iconRect.de.name
+                    font.pixelSize: 7
+                    visible: false
+                }
+
                 Timer {
                     id: u1vis
 
-                    interval: 150
+                    interval: properties.clickEffectInterval
                     onTriggered: {
                         u1.visible = false;
                     }
@@ -186,26 +175,42 @@ PanelWindow {
                         if (iconRect.de)
                             iconRect.de.execute();
 
-                        recentrating = recentrating + 3
-                        console.log(iconRect.de + "RecRating Increased")
-
-
-
+                        recentrating = recentrating + 3;
+                        console.log(iconRect.de + " RecRating Increased");
                     }
                 }
-
             }
-
         }
-
-      
-
     }
 
- 
+    PopupWindow {
+        id: launcher
+        width: properties.totalWidth
+        height: 300
+        visible: false
+        color: "transparent"
+
+        anchor {
+
+            item: recdockBar
+            edges: Edges.Top | Edges.Left
+            gravity: Edges.Top | Edges.Right
+     
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            color: "red"
+            radius: 10
+        }
+        
+
+    }
+    
     BackgroundEffect.blurRegion: Region {
         item: recdockBar
         radius: recdockBar.radius
     }
+
 
 }

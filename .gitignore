@@ -14,3 +14,19 @@ config/.config/systemd/
 config/.config/dconf/
 
 local/.local/state/
+
+local/.local/share/gvfs-metadata/
+
+local/.local/share/mime/
+
+local/.local/share/Trash/
+
+local/.local/share/recently-used.xbel
+
+local/.local/share/desktop-directories/
+
+local/.local/share/applications/wine/
+
+local/.local/share/applications/mimeinfo.cache
+
+local/.local/share/applications/wine-extension-mcaddon.desktop
